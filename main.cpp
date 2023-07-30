@@ -1,4 +1,8 @@
 
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -7,15 +11,11 @@
 #include "OpenGL/headers/input.h"
 #include "OpenGL/classes/Model.h"
 
-const unsigned int SCR_WIDTH = 1280;
-const unsigned int SCR_HEIGHT = 720;
+const unsigned int SCR_WIDTH = 1920;
+const unsigned int SCR_HEIGHT = 1080;
+static bool useBlinn = false;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-
-static int selection = 0;
-static std::vector<glm::vec3> positions(10);
-static std::vector<glm::vec3> rotations(10);
-static std::vector<glm::vec3> sizes(10);
 
 int main()
 {
@@ -36,6 +36,14 @@ int main()
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init();
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -78,6 +86,10 @@ int main()
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 model = glm::mat4(1.0f);
@@ -86,16 +98,16 @@ int main()
 
         glm::mat4 rotationMat(1.0f);
         
-        rotationMat = glm::rotate(rotationMat, sin((float)glfwGetTime() * 2.0f) / 10 , glm::vec3(0.0f, 1.0f, 1.0f));
+        rotationMat = glm::rotate(rotationMat, (float)glfwGetTime() * deltaTime / 1000 , glm::vec3(0.0f, 1.0f, 1.0f));
         pointLightPositions[0] = glm::vec3(rotationMat * glm::vec4(pointLightPositions[0], 0.01f));
 
-        rotationMat = glm::rotate(rotationMat, sin((float)glfwGetTime() * 2.0f) / 100 , glm::vec3(0.0f, 1.0f, 1.0f));
+        rotationMat = glm::rotate(rotationMat, (float)glfwGetTime() * deltaTime / 10000 , glm::vec3(0.0f, 1.0f, 1.0f));
         pointLightPositions[1] = glm::vec3(rotationMat * glm::vec4(pointLightPositions[1], 0.01f));
 
-        rotationMat = glm::rotate(rotationMat, sin((float)glfwGetTime() * 2.0f) / 1000, glm::vec3(0.0f, 1.0f, 1.0f));
+        rotationMat = glm::rotate(rotationMat, (float)glfwGetTime() * deltaTime / 10000, glm::vec3(0.0f, 1.0f, 1.0f));
         pointLightPositions[2] = glm::vec3(rotationMat * glm::vec4(pointLightPositions[2], 0.01f));
 
-        rotationMat = glm::rotate(rotationMat, sin((float)glfwGetTime() * 2.0f) / 5 , glm::vec3(0.0f, 1.0f, 1.0f));
+        rotationMat = glm::rotate(rotationMat, (float)glfwGetTime() * deltaTime / 500 , glm::vec3(0.0f, 1.0f, 1.0f));
         pointLightPositions[3] = glm::vec3(rotationMat * glm::vec4(pointLightPositions[3], 0.01f));
         
         ourShader.setMat4("projection", projection);
@@ -149,7 +161,8 @@ int main()
         ourShader.setFloat("spotLight.linear", 0.09f);
         ourShader.setFloat("spotLight.quadratic", 0.032f);
         ourShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-        ourShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));     
+        ourShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+        ourShader.setBool("blinn", useBlinn);
 
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
@@ -169,10 +182,23 @@ int main()
             lightShader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+
+        ImGui::Begin("Scene editor");
+        ImGui::SeparatorText("Switch lighitng models");
+        ImGui::Checkbox("Use bling-phong? (Uses phong otherwise)", &useBlinn);
+
+        ImGui::End();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
         
     glfwDestroyWindow(window);
     glfwTerminate();

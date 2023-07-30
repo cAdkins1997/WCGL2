@@ -144,7 +144,8 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>Default</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -165,6 +166,7 @@
     <ClCompile Include="libraries\include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OpenGL\classes\Shader.cpp" />
+    <ClCompile Include="OpenGL\shapes\Cube.1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h" />
@@ -183,6 +185,7 @@
     <ClInclude Include="OpenGL\headers\common.h" />
     <ClInclude Include="OpenGL\headers\input.h" />
     <ClInclude Include="OpenGL\headers\texturesampling.h" />
+    <ClInclude Include="OpenGL\shapes\Cube.1.h" />
     <ClInclude Include="OpenGL\shapes\cube.h" />
   </ItemGroup>
   <ItemGroup>
