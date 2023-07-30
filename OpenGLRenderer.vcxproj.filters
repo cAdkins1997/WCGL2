@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\imgui">
+      <UniqueIdentifier>{384ab1dc-d3fc-4936-bed4-c14e5ee8633c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{416f609b-97e3-4652-b115-b30fe80aa018}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\imgui">
+      <UniqueIdentifier>{bc93e006-f425-45c9-9dfd-37c818232115}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\OpenGL">
+      <UniqueIdentifier>{2a237006-f6ff-4d5a-bd90-1811ea0327ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\OpenGL\classes">
+      <UniqueIdentifier>{471f620c-24ee-423a-b506-c58ac8f94fe1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\OpenGL">
+      <UniqueIdentifier>{3da1ecc5-924d-443f-98be-9b1804f9b947}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\OpenGL\classes">
+      <UniqueIdentifier>{70df9c71-1ec8-4e6a-be0c-8b829e7713cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\OpenGL\shapes">
+      <UniqueIdentifier>{df42a132-39ec-4a38-8246-e51dda7055ce}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="glad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\include\imgui\imgui_tables.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\include\imgui\imgui_widgets.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\include\imgui\imgui.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\include\imgui\imgui_demo.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\include\imgui\imgui_draw.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\include\imgui\imgui_impl_glfw.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries\include\imgui\imgui_impl_opengl3.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGL\classes\Mesh.cpp">
+      <Filter>Source Files\OpenGL\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGL\classes\Model.cpp">
+      <Filter>Source Files\OpenGL\classes</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGL\classes\Shader.cpp">
+      <Filter>Source Files\OpenGL\classes</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="imgui\imgui_impl_opengl3.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_internal.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_rectpack.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_textedit.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_truetype.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imconfig.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_glfw.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGL\classes\Shader.h">
+      <Filter>Header Files\OpenGL\classes</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGL\classes\Camera.h">
+      <Filter>Header Files\OpenGL\classes</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGL\classes\Mesh.h">
+      <Filter>Header Files\OpenGL\classes</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGL\classes\Model.h">
+      <Filter>Header Files\OpenGL\classes</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGL\headers\common.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGL\headers\input.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGL\headers\texturesampling.h">
+      <Filter>Header Files\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGL\shapes\cube.h">
+      <Filter>Header Files\OpenGL\shapes</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
