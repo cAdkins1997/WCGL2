@@ -13,9 +13,10 @@
 
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
-static bool useBlinn = false;
+static int selection = 0;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+Shader determineShader(const int &selection);
 
 int main()
 {
@@ -54,6 +55,8 @@ int main()
     stbi_set_flip_vertically_on_load(true);
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     unsigned int lightCubeVAO, VBO;
     glGenVertexArrays(1, &lightCubeVAO);
@@ -68,8 +71,7 @@ int main()
     // note that we update the lamp's position attribute's stride to reflect the updated buffer data
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
-    Shader ourShader("shaders/1.modelLoading.vert", "shaders/1.modelLoading.frag");
+    
     Shader lightShader("shaders/lightCubeShader.vert", "shaders/lightCubeShader.frag");
 
     Model ourModel("resources/models/backpack/backpack.obj");
@@ -94,21 +96,26 @@ int main()
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 model = glm::mat4(1.0f);
 
+        Shader ourShader = determineShader(selection);
+        
         ourShader.use();
 
         glm::mat4 rotationMat(1.0f);
         
-        rotationMat = glm::rotate(rotationMat, (float)glfwGetTime() * deltaTime / 1000 , glm::vec3(0.0f, 1.0f, 1.0f));
+        rotationMat = glm::rotate(rotationMat, static_cast<float>(glfwGetTime()) * deltaTime / 1000 , glm::vec3(0.0f, 1.0f, 1.0f));
         pointLightPositions[0] = glm::vec3(rotationMat * glm::vec4(pointLightPositions[0], 0.01f));
 
-        rotationMat = glm::rotate(rotationMat, (float)glfwGetTime() * deltaTime / 10000 , glm::vec3(0.0f, 1.0f, 1.0f));
+        rotationMat = glm::rotate(rotationMat, static_cast<float>(glfwGetTime()) * deltaTime / 10000 , glm::vec3(0.0f, 1.0f, 1.0f));
         pointLightPositions[1] = glm::vec3(rotationMat * glm::vec4(pointLightPositions[1], 0.01f));
 
-        rotationMat = glm::rotate(rotationMat, (float)glfwGetTime() * deltaTime / 10000, glm::vec3(0.0f, 1.0f, 1.0f));
+        rotationMat = glm::rotate(rotationMat, static_cast<float>(glfwGetTime()) * deltaTime / 10000, glm::vec3(0.0f, 1.0f, 1.0f));
         pointLightPositions[2] = glm::vec3(rotationMat * glm::vec4(pointLightPositions[2], 0.01f));
 
-        rotationMat = glm::rotate(rotationMat, (float)glfwGetTime() * deltaTime / 500 , glm::vec3(0.0f, 1.0f, 1.0f));
+        rotationMat = glm::rotate(rotationMat, static_cast<float>(glfwGetTime()) * deltaTime / 500 , glm::vec3(0.0f, 1.0f, 1.0f));
         pointLightPositions[3] = glm::vec3(rotationMat * glm::vec4(pointLightPositions[3], 0.01f));
+
+        rotationMat = glm::rotate(rotationMat, static_cast<float>(glfwGetTime()) * deltaTime/ 100, glm::vec3(1.0f, 1.0f, 1.0f));
+        pointLightPositions[4] = glm::vec3(rotationMat * glm::vec4(pointLightPositions[4], 0.01f));
         
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
@@ -152,6 +159,14 @@ int main()
         ourShader.setFloat("pointLights[3].linear", 0.09f);
         ourShader.setFloat("pointLights[3].quadratic", 0.032f);
         
+        ourShader.setVec3("pointLights[4].position", pointLightPositions[4]);
+        ourShader.setVec3("pointLights[4].ambient", pointLightColors[4].x * 0.1f, pointLightColors[4].y * 0.1f,pointLightColors[4].z * 0.1f);
+        ourShader.setVec3("pointLights[4].diffuse", pointLightColors[4].x, pointLightColors[4].y, pointLightColors[4].z);
+        ourShader.setVec3("pointLights[4].specular", pointLightColors[4].x, pointLightColors[4].y, pointLightColors[4].z);
+        ourShader.setFloat("pointLights[4].constant", 1.0f);
+        ourShader.setFloat("pointLights[4].linear", 0.09f);
+        ourShader.setFloat("pointLights[4].quadratic", 0.032f);
+        
         ourShader.setVec3("spotLight.position", camera.Position);
         ourShader.setVec3("spotLight.direction", camera.Front);
         ourShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
@@ -162,10 +177,14 @@ int main()
         ourShader.setFloat("spotLight.quadratic", 0.032f);
         ourShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
         ourShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
-        ourShader.setBool("blinn", useBlinn);
 
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        ourShader.setMat4("model", model);
+        ourModel.Draw(ourShader);
+
+        model = glm::translate(model, glm::vec3(-2.0f, -2.0f, -2.0f));
+        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
 
@@ -174,18 +193,22 @@ int main()
         lightShader.setMat4("view", view);
 
         glBindVertexArray(lightCubeVAO);
-        for (unsigned int i = 0; i < 4; i++)
+        for (unsigned int i = 0; i < 5; i++)
         {
+            lightShader.setVec3("lightColours", pointLightColors[i]);
             model = glm::mat4(1.0f);
             model = glm::translate(model, pointLightPositions[i]);
             model = glm::scale(model, glm::vec3(0.2f));
             lightShader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-
+        
         ImGui::Begin("Scene editor");
         ImGui::SeparatorText("Switch lighitng models");
-        ImGui::Checkbox("Use bling-phong? (Uses phong otherwise)", &useBlinn);
+        ImGui::RadioButton("Gouraud Shading", &selection, 0); ImGui::SameLine();
+        ImGui::RadioButton("Phong shading", &selection, 1); ImGui::SameLine();
+        ImGui::RadioButton("Blinn-Phong shading", &selection, 2);
+        ImGui::RadioButton("Depth Buffer Visualization", &selection, 3);
 
         ImGui::End();
 
@@ -208,4 +231,21 @@ int main()
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+}
+
+Shader determineShader(const int &selection)
+{
+    if (selection == 0)
+    {
+        return {"shaders/1.gouraudShader.vert", "shaders/1.gouraudShader.frag"};
+    } else if (selection == 1)
+    {
+        return {"shaders/1.phongShading.vert", "shaders/1.phongShading.frag"};
+    } else if (selection == 2)
+    {
+        return {"shaders/1.blinnPhongShading.vert", "shaders/1.blinnPhongShading.frag"};
+    } else
+    {
+        return {"shaders/depthBufferVisualization.vert", "shaders/depthBufferVisualization.frag"};
+    }
 }
