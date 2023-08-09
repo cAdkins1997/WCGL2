@@ -1,10 +1,13 @@
 
+#include <complex>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include "OpenGL/classes/Shader.h"
 #include "OpenGL/headers/texturesampling.h"
@@ -56,24 +59,28 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+    
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    
     glCullFace(GL_BACK);
 
     unsigned int lightCubeVAO, VBO;
     glGenVertexArrays(1, &lightCubeVAO);
     glBindVertexArray(lightCubeVAO);
-
+    
     glGenBuffers(1, &VBO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // note that we update the lamp's position attribute's stride to reflect the updated buffer data
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     
     Shader lightShader("shaders/lightCubeShader.vert", "shaders/lightCubeShader.frag");
-
+    Shader outlineShader("shaders/1.blinnPhongShading.vert", "shaders/outline.frag");
     Model ourModel("resources/models/backpack/backpack.obj");
 
     while (!glfwWindowShouldClose(window))
@@ -86,15 +93,18 @@ int main()
         processInput(window);
         
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        outlineShader.use();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 model = glm::mat4(1.0f);
+        outlineShader.setMat4("view", view);
+        outlineShader.setMat4("projection", projection);
 
         Shader ourShader = determineShader(selection);
         
@@ -102,26 +112,26 @@ int main()
 
         glm::mat4 rotationMat(1.0f);
         
-        rotationMat = glm::rotate(rotationMat, static_cast<float>(glfwGetTime()) * deltaTime / 1000 , glm::vec3(0.0f, 1.0f, 1.0f));
+        rotationMat = glm::rotate_slow(rotationMat, deltaTime, glm::vec3(1.0f, 0.0f, 1.0f));
         pointLightPositions[0] = glm::vec3(rotationMat * glm::vec4(pointLightPositions[0], 0.01f));
-
-        rotationMat = glm::rotate(rotationMat, static_cast<float>(glfwGetTime()) * deltaTime / 10000 , glm::vec3(0.0f, 1.0f, 1.0f));
+        
+        rotationMat = glm::rotate_slow(rotationMat, deltaTime, glm::vec3(0.0f, 1.0f, 1.0f));
         pointLightPositions[1] = glm::vec3(rotationMat * glm::vec4(pointLightPositions[1], 0.01f));
 
-        rotationMat = glm::rotate(rotationMat, static_cast<float>(glfwGetTime()) * deltaTime / 10000, glm::vec3(0.0f, 1.0f, 1.0f));
+        rotationMat = glm::rotate_slow(rotationMat, deltaTime, glm::vec3(0.0f, 1.0f, 1.0f));
         pointLightPositions[2] = glm::vec3(rotationMat * glm::vec4(pointLightPositions[2], 0.01f));
 
-        rotationMat = glm::rotate(rotationMat, static_cast<float>(glfwGetTime()) * deltaTime / 500 , glm::vec3(0.0f, 1.0f, 1.0f));
+        rotationMat = glm::rotate_slow(rotationMat, deltaTime, glm::vec3(0.0f, 1.0f, 1.0f));
         pointLightPositions[3] = glm::vec3(rotationMat * glm::vec4(pointLightPositions[3], 0.01f));
 
-        rotationMat = glm::rotate(rotationMat, static_cast<float>(glfwGetTime()) * deltaTime/ 100, glm::vec3(1.0f, 1.0f, 1.0f));
+        rotationMat = glm::rotate_slow(rotationMat, deltaTime, glm::vec3(1.0f, 1.0f, 1.0f));
         pointLightPositions[4] = glm::vec3(rotationMat * glm::vec4(pointLightPositions[4], 0.01f));
         
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
         ourShader.setVec3("viewPos", camera.Position);
         ourShader.setFloat("material.shininess", 32.0f);
-
+        
         ourShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
         ourShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
         ourShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
@@ -177,17 +187,34 @@ int main()
         ourShader.setFloat("spotLight.quadratic", 0.032f);
         ourShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
         ourShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+        ourShader.setBool("flashLightOn", flashLightOn);
 
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
+        
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
+        
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0xFF);
+        glDisable(GL_DEPTH_TEST);
+        outlineShader.use();
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.02f));
+        outlineShader.setMat4("model", model);
+        ourModel.Draw(outlineShader);
 
-        model = glm::translate(model, glm::vec3(-2.0f, -2.0f, -2.0f));
-        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
-        ourShader.setMat4("model", model);
-        ourModel.Draw(ourShader);
+        glStencilMask(0xFF);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glEnable(GL_DEPTH_TEST);
 
+        glEnable(GL_STENCIL_TEST);
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        
         lightShader.use();
         lightShader.setMat4("projection", projection);
         lightShader.setMat4("view", view);
@@ -208,7 +235,8 @@ int main()
         ImGui::RadioButton("Gouraud Shading", &selection, 0); ImGui::SameLine();
         ImGui::RadioButton("Phong shading", &selection, 1); ImGui::SameLine();
         ImGui::RadioButton("Blinn-Phong shading", &selection, 2);
-        ImGui::RadioButton("Depth Buffer Visualization", &selection, 3);
+        ImGui::RadioButton("Gooch Shading", &selection, 3);
+        ImGui::RadioButton("Depth Buffer Visualization", &selection, 4);
 
         ImGui::End();
 
@@ -244,6 +272,9 @@ Shader determineShader(const int &selection)
     } else if (selection == 2)
     {
         return {"shaders/1.blinnPhongShading.vert", "shaders/1.blinnPhongShading.frag"};
+    } else if (selection == 3)
+    {
+        return {"shaders/1.goochShading.vert", "shaders/1.goochShading.frag"};
     } else
     {
         return {"shaders/depthBufferVisualization.vert", "shaders/depthBufferVisualization.frag"};

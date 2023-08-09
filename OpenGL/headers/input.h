@@ -5,39 +5,39 @@
 #ifndef OPENGLRENDERER_INPUT_H
 #define OPENGLRENDERER_INPUT_H
 
-#include "common.h"
 #include "../classes/Camera.h"
 
 #endif //OPENGLRENDERER_INPUT_H
 
-float deltaTime = 0.0f;
-float lastFrame = 0.0f;
+inline float deltaTime = 0.0f;
+inline float lastFrame = 0.0f;
 
-float lastX = 400, lastY = 300;
-float fov = 90.0f;
-bool firstMouse = true;
+inline float lastX = 400, lastY = 300;
+inline float fov = 90.0f;
+inline bool firstMouse = true;
+inline bool flashLightOn = true;
 
-glm::vec3 lightPos(0.0f, 1.5f, 2.0f);
+inline static glm::vec3 lightPos(-0.2f, -1.0f, -0.3f);
 
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+inline Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
-void processInput(GLFWwindow *window)
+inline void processInput(GLFWwindow *window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_8) == GLFW_PRESS) {
         lightPos.y = lightPos.y += 0.01f;
     }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
         lightPos.y = lightPos.y -= 0.01f;
     }
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS) {
         lightPos.x = lightPos.x += 0.01f;
     }
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS) {
         lightPos.x = lightPos.x -= 0.01f;
     }
     if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS) {
@@ -45,6 +45,18 @@ void processInput(GLFWwindow *window)
     }
     if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS) {
         lightPos.z = lightPos.z -= 0.01f;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+    {
+        if (flashLightOn)
+        {
+            flashLightOn = false;
+        }
+        else if (!flashLightOn)
+        {
+            flashLightOn = true;
+        }
     }
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -68,7 +80,7 @@ void processInput(GLFWwindow *window)
     }
 }
 
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
+inline void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
 
     auto xpos = static_cast<float>(xposIn);
     auto ypos = static_cast<float>(yposIn);
@@ -89,7 +101,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+inline void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
